@@ -4,11 +4,22 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-	devtool: 'source-map',
+	devtool: 'inline-source-map',
 	stats: 'errors-only',
 	entry: {
-		background: './source/background',
-		options: './source/options'
+		background: './source/background'
+	},
+	module: {
+		rules: [
+			{
+				test: /\.(js|ts|tsx)$/,
+				loader: 'ts-loader',
+				exclude: /node_modules/
+			},
+		],
+	},
+	resolve: {
+		extensions: ['.ts', '.js']
 	},
 	output: {
 		path: path.join(__dirname, 'distribution'),
