@@ -1,6 +1,8 @@
 <p align="center" style="text-align: center">
 <h1>Lokalise document preview<br/> browser extension<br/> [EXPERIMENTAL & UNOFFICIAL]</h1>
 
+[Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/) • Waiting to Chrome Westore admission
+
 <img src="https://github.com/terales/lokalise-html-document-preview/blob/master/media/preview.png?raw=true"
 		height="329px" width="311px" alt="Screenshot of Lokalise file preview UI adjusted by extension" /> 
 </p>
