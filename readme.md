@@ -1,14 +1,9 @@
-<div align="center">
+<p align="center">
+<h1>Lokalise document preview<br/> browser extension<br/> [EXPERIMENTAL & UNOFFICIAL]</h1>
 
-	<h1>
-		Lokalise document preview<br/>
-		browser extension<br/>
-		[EXPERIMENTAL & UNOFFICIAL]
-	</h1>
-
-	<img src="https://github.com/terales/lokalise-html-document-preview/blob/master/media/preview.png?raw=true"
-		 height="329px" width="311px" alt="Screenshot of Lokalise file preview UI adjusted by extension" /> 
-</div>
+<img src="https://github.com/terales/lokalise-html-document-preview/blob/master/media/preview.png?raw=true"
+		height="329px" width="311px" alt="Screenshot of Lokalise file preview UI adjusted by extension" /> 
+</p>
 
 ## How to use
 
