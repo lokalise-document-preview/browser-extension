@@ -1,7 +1,7 @@
 <p align="center" style="text-align: center">
 <h1>Lokalise document preview<br/> browser extension<br/> [EXPERIMENTAL & UNOFFICIAL]</h1>
 
-[Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/) • Waiting to Chrome Westore admission
+[Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/) • Waiting to Chrome Webstore admission
 
 <img src="https://github.com/terales/lokalise-html-document-preview/blob/master/media/preview.png?raw=true"
 		height="329px" width="311px" alt="Screenshot of Lokalise file preview UI adjusted by extension" /> 
@@ -9,14 +9,14 @@
 
 ## How to use
 
-- Install extension.
-- Create a Document project at [Lokalise.com](https://lokalise.com/).
+- Install the extension for Chrome (pending) or [Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/).
+- Create a Document type project at [Lokalise.com](https://lokalise.com/).
 - Upload an HTML document (file extension should be `.html`).
 - Translate the document.
 - Go to "Download" section.
 - Hit "Preview" and find the preview at the bottom of the page.
 
-If your document in bigger than a preview then a scrolling is available for checkink all the document contents.
+If your document in bigger than a preview then a scrolling is available for checking all the document contents.
 
 ## Previews are local and secure
 
