@@ -28,3 +28,9 @@ This extension is generating previews locally in a secure sandboxed enviroment w
 Source code is open and available for audit:
 - [`source/preview_content_script.ts`](source/preview_content_script.ts)
 - [`source/manifest.json`](source/manifest.json)
+
+## Privacy policy
+
+This browser extension does not collect, send or store any information at all.<br/>
+
+It's not affiliated with Lokalise.com and is just a personal project.
