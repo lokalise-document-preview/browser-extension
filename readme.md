@@ -25,7 +25,7 @@ This extension is generating previews locally in a secure sandboxed enviroment w
 
 | Available                                                                                                                                     | Blocked                                             |
 |-----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| All HTML tags,<br> All links are clickable,<br> CSS styles (inline and from absolute links),<br> Images would be loaded from absolute links). | JavaScript,<br> Forms won't be submitted,<br> Popups are blocked. |
+| All HTML tags,<br> All links are clickable,<br> CSS styles (inline and from absolute links),<br> Images are loaded from absolute links. | JavaScript,<br> Forms won't be submitted,<br> Popups are blocked. |
 
 Source code is open and available for audit:
 - [`source/preview_content_script.ts`](source/preview_content_script.ts)
