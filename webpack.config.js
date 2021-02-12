@@ -7,7 +7,7 @@ module.exports = {
 	devtool: 'inline-source-map',
 	stats: 'errors-only',
 	entry: {
-		background: './source/background'
+		preview_content_script: './source/preview_content_script'
 	},
 	module: {
 		rules: [
@@ -39,6 +39,7 @@ module.exports = {
 		])
 	],
 	optimization: {
+		usedExports: true,
 		minimizer: [
 			new TerserPlugin({
 				terserOptions: {

@@ -17,11 +17,14 @@
 	"permissions": [
 		"storage"
 	],
-	"background": {
-		"persistent": false,
-		"scripts": [
-			"browser-polyfill.min.js",
-			"background.js"
-		]
-	}
+	"content_scripts": [
+		{
+			"matches": [
+				"https://app.lokalise.com/download/download-preview"
+			],
+			"js": [
+				"preview_content_script.js"
+			]
+		}
+	]
 }

@@ -1,5 +1,6 @@
 {
 	"extends": "@sindresorhus/tsconfig",
+	"moduleResolution": "node",
 	"compilerOptions": {
 		"target": "esnext",
 		"declaration": false
