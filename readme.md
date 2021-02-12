@@ -3,11 +3,13 @@
 
 [Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/) • Waiting to Chrome Webstore admission
 
+<a href="https://youtu.be/F-BfvoxQGQ4" target="_blank" rel="noopener noreferrer">
 <img src="https://github.com/terales/lokalise-html-document-preview/blob/master/media/preview.png?raw=true"
 		height="329px" width="311px" alt="Screenshot of Lokalise file preview UI adjusted by extension" /> 
 </p>
+</a>
 
-## How to use
+## How to use ([video demo](https://youtu.be/F-BfvoxQGQ4))
 
 - Install the extension for Chrome (pending) or [Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/).
 - Create a Document type project at [Lokalise.com](https://lokalise.com/).
