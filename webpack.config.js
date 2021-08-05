@@ -7,7 +7,9 @@ module.exports = {
 	devtool: 'inline-source-map',
 	stats: 'errors-only',
 	entry: {
-		preview_content_script: './source/preview_content_script'
+		preview_content_script: './source/preview_content_script',
+		edit_attributes_with_form: './source/edit_attributes_with_form',
+		editor_context_script: './source/editor_context_script'
 	},
 	module: {
 		rules: [
@@ -28,6 +30,7 @@ module.exports = {
 	plugins: [
 		new SizePlugin(),
 		new CopyWebpackPlugin([
+			'node_modules/webextension-polyfill/dist/browser-polyfill.min.js',
 			{
 				from: '**/*',
 				context: 'source',

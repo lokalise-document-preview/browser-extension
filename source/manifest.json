@@ -22,6 +22,16 @@
 			"js": [
 				"preview_content_script.js"
 			]
+		},
+		{
+			"matches": [
+				"https://app.lokalise.com/project/*view=document*"
+			],
+			"js": [
+				"browser-polyfill.min.js",
+				"editor_context_script.js"
+			]
 		}
-	]
+	],
+	"web_accessible_resources": ["edit_attributes_with_form.js"]
 }

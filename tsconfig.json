@@ -2,8 +2,9 @@
 	"extends": "@sindresorhus/tsconfig",
 	"moduleResolution": "node",
 	"compilerOptions": {
-		"target": "esnext",
-		"declaration": false
+		"target": "es2018",
+		"declaration": false,
+		"esModuleInterop": true
 	},
 	"include": [
 		"source"
