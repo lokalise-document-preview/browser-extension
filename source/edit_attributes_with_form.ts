@@ -1,5 +1,6 @@
 const keysTable = document.querySelector("#endless")!;
 const observer = new MutationObserver(callback);
+const attributesToWatch = ['title', 'alt', 'src', 'href'];
 
 var editor = <iObservableObject>{
     currentFieldValue: ''
@@ -33,7 +34,6 @@ function callback(mutationList: Array<MutationRecord>) {
   }
 
   function addFormToBottomPanel(panel: Element) {
-    console.log('add form the bottom panel', panel);
     const parser = new DOMParser();
 
     editor.observe(appendForm);
@@ -48,29 +48,36 @@ function callback(mutationList: Array<MutationRecord>) {
         // For text add a line in between
         const htmlKey = parser.parseFromString(value, 'text/html');
         const matchingTags = htmlKey.querySelectorAll('a, img');
+        const currentKeyData: any = [];
+        let hasEditableAttrs = false;
 
-        const pre = document.createElement('pre');
-        pre.id = 'ffjfjjf-form-for-editing-attributes';
-        pre.style.marginTop = '0.6em';
         matchingTags.forEach(el => {
-            pre.textContent += `${el.tagName}: `;
-            new Array('title', 'alt', 'src', 'href').forEach(attrName => {
+            const currentTag: any = {
+                'tag': el.tagName,
+                'attributes': []
+            };
+            attributesToWatch.forEach(attrName => {
                 if (el.getAttribute(attrName)) {
-                    pre.textContent += `${attrName}="${el.getAttribute(attrName)}" `;
+                    currentTag.attributes.push({
+                        name: attrName,
+                        value: escapeHtml(el.getAttribute(attrName)!),
+                        placeholder: 'attr-' + (Math.random() + 1).toString(36).substring(7)
+                    });
+                    hasEditableAttrs = true;
                 }
             });
-            pre.textContent += '\n';
+            if (currentTag.attributes.length > 0) {
+                currentKeyData.push(currentTag);
+            }
         });
 
-        const existingForm = panel.querySelector(`#${pre.id}`)
+        const existingForm = panel.querySelector(`#terales-edits-attrs-form`)
         if (existingForm) {
-            panel.removeChild(existingForm);
+            panel.removeChild(existingForm.parentNode!);
         }
-        if (matchingTags.length > 0) {
-            panel.append(pre);
+        if (hasEditableAttrs) {
+            panel.appendChild(generateForm(currentKeyData));
         }
-
-        // TODO Make form immidiately reflect the changes in the key
     }
   }
 
@@ -114,3 +121,81 @@ function makeObservable(target: iObservableObject) {
       }
     });
   }
+
+function escapeHtml(unsafe: string) {
+    return unsafe
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function generateForm(data: any): DocumentFragment {
+    // Data [ a: { href: '' }, img: { src: '', title: ''} ]
+    // Event listeners in inout (change?)
+    // Generate based on tags/attributes input
+    return document.createRange().createContextualFragment(`
+<div>
+    <style>
+        #terales-edits-attrs-form .terales-tag {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-content: stretch;
+            align-items: flex-start;
+        }
+        #terales-edits-attrs-form .terales-tag:first-child {
+            margin-top: 16px;
+        }
+    
+        #terales-edits-attrs-form .terales-label {
+            font-size: 16px;
+            line-height: 35px;
+            width: 55px;
+            overflow: hidden;
+            order: 0;
+            flex: 0 0 auto;
+            align-self: auto;
+        }
+    
+        #terales-edits-attrs-form .terales-field-container {
+            order: 0;
+            flex: 1 1 auto;
+            align-self: auto;
+        }
+
+        #terales-edits-attrs-form .terales-horizontal-spacing {
+            flex: 0 0 16px;
+        }
+    </style>
+    <div id="terales-edits-attrs-form">
+        ${data.reduce(generateTag, '')}
+    </div>
+</div>
+    `);
+
+    function generateTag(generated: string, tagData:any) {
+        let tagName = '';
+        if (tagData.tag == 'A') tagName = 'Link:';
+        if (tagData.tag == 'IMG') tagName = 'Image:';
+
+        return generated + `
+            <div class="terales-tag">
+                <div class="terales-label">${tagName}</div>
+                ${tagData.attributes.reduce(generateAttribute, '')}
+            </div>
+        `;
+
+        function generateAttribute(generated: string, attrData: any) {
+            return generated + `
+                <div class="terales-horizontal-spacing"></div>
+                <div class="terales-field-container input-group input-group-sm">
+                    <span class="input-group-addon">${attrData.name}</span>
+                    <input data-placeholder="${attrData.placeholder}" value="${attrData.value}" type="text" class="form-control" />
+                </div>
+            `;
+        }
+    }
+}
