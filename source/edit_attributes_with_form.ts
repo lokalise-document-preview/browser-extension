@@ -5,10 +5,11 @@ const attributesToWatch = ['title', 'alt', 'src', 'href'];
 const parser = new DOMParser();
 let codemirror: CodeMirror.Editor;
 
-var editor = <iObservableObject>{
-    currentFieldValue: ''
+const editorTemplate = <iObservableObject>{
+    currentFieldValue: '',
+    keepForm: false
 };
-var editor = makeObservable(editor);
+let editor = makeObservable(Object.assign({}, editorTemplate));
 
 observer.observe(keysTable, {
     childList: true,
@@ -29,6 +30,7 @@ function callback(mutationList: Array<MutationRecord>) {
             }
 
             if (el.classList?.contains('CodeMirror')) {
+                editor = makeObservable(Object.assign({}, editorTemplate));
                 readValue(el);
                 return
             }
@@ -38,9 +40,17 @@ function callback(mutationList: Array<MutationRecord>) {
 
 function addFormToBottomPanel(panel: Element) {
     editor.observe(appendForm);
-    appendForm();
+    appendForm('currentFieldValue');
 
-    function appendForm() {
+    function appendForm(property: string) {
+        if (property != 'currentFieldValue') {
+            return;
+        }
+
+        if (editor.keepForm) {
+            editor.keepForm = false;
+            return;
+        }
         const matchingTags = editor.htmlKey.querySelectorAll('a, img');
         const currentKeyData: any = [];
         let hasEditableAttrs = false;
@@ -84,8 +94,9 @@ function readValue(element: Element) {
     updateCurrentValue();
 
     function updateCurrentValue() {
-        editor.currentFieldValue = codemirror.getValue();
-        editor.htmlKey = parser.parseFromString(editor.currentFieldValue, 'text/html');
+        const newValue = codemirror.getValue();
+        editor.htmlKey = parser.parseFromString(newValue, 'text/html');
+        editor.currentFieldValue = newValue;
     }
 }
 
@@ -94,6 +105,7 @@ interface iObservableObject extends Object {
     observe: Function;
     currentFieldValue: string;
     htmlKey: Document;
+    keepForm: boolean;
 }
 
 function makeObservable(target: iObservableObject) {
@@ -108,10 +120,19 @@ function makeObservable(target: iObservableObject) {
     // 2. Create a proxy to handle changes
     return new Proxy(target, {
         set(target, property, value, receiver) {
-            if (target.currentFieldValue === value) return true;
+            let initialValue = '';
+            let newValue = '';
+            if (property == 'currentFieldValue') {
+                initialValue = target.currentFieldValue;
+                newValue = value;
+            }
 
-            let success = Reflect.set(target, property, value, receiver); // forward the operation to object
-            if (success) { // if there were no error while setting the property
+            const success = Reflect.set(target, property, value, receiver); // forward the operation to object
+
+            if (success && property == 'currentFieldValue' && initialValue != newValue) { // if there were no error while setting the property
+                console.log('Called: ', value);
+                console.trace();
+
                 // call all handlers
                 target.handlers.forEach(handler => handler(property, value));
             }
@@ -130,6 +151,7 @@ function generateForm(data: any): DocumentFragment {
             input.addEventListener('input', () => {
                 const changedEl = <Element>editor.htmlKey.evaluate(input.dataset.xpath!, editor.htmlKey, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
                 changedEl.setAttribute(input.dataset.attributeName!, input.value);
+                editor.keepForm = true;
                 codemirror.setValue(editor.htmlKey.body.innerHTML);
             });
         }
