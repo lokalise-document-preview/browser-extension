@@ -2,6 +2,9 @@ const keysTable = document.querySelector("#endless")!;
 const observer = new MutationObserver(callback);
 const attributesToWatch = ['title', 'alt', 'src', 'href'];
 
+const parser = new DOMParser();
+let codemirror: CodeMirror.Editor;
+
 var editor = <iObservableObject>{
     currentFieldValue: ''
 };
@@ -34,29 +37,26 @@ function callback(mutationList: Array<MutationRecord>) {
 }
 
 function addFormToBottomPanel(panel: Element) {
-    const parser = new DOMParser();
-
     editor.observe(appendForm);
-    appendForm('', editor.currentFieldValue);
+    appendForm();
 
-    function appendForm(_property: string, value: string) {
-        const htmlKey = parser.parseFromString(value, 'text/html');
-        const matchingTags = htmlKey.querySelectorAll('a, img');
+    function appendForm() {
+        const matchingTags = editor.htmlKey.querySelectorAll('a, img');
         const currentKeyData: any = [];
         let hasEditableAttrs = false;
 
         matchingTags.forEach(el => {
             const currentTag: any = {
-                'tag': el.tagName,
-                'attributes': []
+                tag: el.tagName,
+                xpath: getXPathForElement(<HTMLElement>el, editor.htmlKey),
+                attributes: []
             };
 
             attributesToWatch.forEach(attrName => {
                 if (el.getAttribute(attrName)) {
                     currentTag.attributes.push({
                         name: attrName,
-                        value: escapeHtml(el.getAttribute(attrName)!),
-                        placeholder: 'attr-' + (Math.random() + 1).toString(36).substring(7)
+                        value: el.getAttribute(attrName)!
                     });
                     hasEditableAttrs = true;
                 }
@@ -67,7 +67,7 @@ function addFormToBottomPanel(panel: Element) {
             }
         });
 
-        const existingForm = panel.querySelector(`#terales-edits-attrs-form`)
+        const existingForm = panel.querySelector(`#terales-edits-attrs-form`);
         if (existingForm) {
             panel.removeChild(existingForm.parentNode!);
         }
@@ -77,14 +77,15 @@ function addFormToBottomPanel(panel: Element) {
     }
 }
 
-  function readValue(element: Element) {
-    const codemirror: CodeMirror.Editor = (element as any).CodeMirror;
+function readValue(element: Element) {
+    codemirror = (element as any).CodeMirror;
     codemirror.on('change', updateCurrentValue);
 
     updateCurrentValue();
 
     function updateCurrentValue() {
         editor.currentFieldValue = codemirror.getValue();
+        editor.htmlKey = parser.parseFromString(editor.currentFieldValue, 'text/html');
     }
 }
 
@@ -92,6 +93,7 @@ interface iObservableObject extends Object {
     handlers: Array<Function>;
     observe: Function;
     currentFieldValue: string;
+    htmlKey: Document;
 }
 
 function makeObservable(target: iObservableObject) {
@@ -118,77 +120,110 @@ function makeObservable(target: iObservableObject) {
     });
 }
 
-function escapeHtml(unsafe: string) {
-    return unsafe
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
 function generateForm(data: any): DocumentFragment {
-    return document.createRange().createContextualFragment(`
-<div>
-    <style>
-        #terales-edits-attrs-form .terales-tag {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            justify-content: space-between;
-            align-content: stretch;
-            align-items: flex-start;
-        }
-        #terales-edits-attrs-form .terales-tag:first-child {
-            margin-top: 16px;
-        }
-    
-        #terales-edits-attrs-form .terales-label {
-            font-size: 16px;
-            line-height: 35px;
-            width: 55px;
-            overflow: hidden;
-            order: 0;
-            flex: 0 0 auto;
-            align-self: auto;
-        }
-    
-        #terales-edits-attrs-form .terales-field-container {
-            order: 0;
-            flex: 1 1 auto;
-            align-self: auto;
-        }
+    const form: DocumentFragment = document
+        .createRange()
+        .createContextualFragment(getFormTemplate(data));
 
-        #terales-edits-attrs-form .terales-horizontal-spacing {
-            flex: 0 0 16px;
+    form.querySelectorAll('.terales-attr-input-js').forEach(input => {
+        if (input instanceof HTMLInputElement) {
+            input.addEventListener('input', () => {
+                const changedEl = <Element>editor.htmlKey.evaluate(input.dataset.xpath!, editor.htmlKey, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                changedEl.setAttribute(input.dataset.attributeName!, input.value);
+                codemirror.setValue(editor.htmlKey.body.innerHTML);
+            });
         }
-    </style>
-    <div id="terales-edits-attrs-form">
-        ${data.reduce(generateTag, '')}
-    </div>
-</div>
-    `);
+    });
 
-    function generateTag(generated: string, tagData:any) {
-        let tagName = '';
-        if (tagData.tag == 'A') tagName = 'Link:';
-        if (tagData.tag == 'IMG') tagName = 'Image:';
+    return form;
 
-        return generated + `
-            <div class="terales-tag">
-                <div class="terales-label">${tagName}</div>
-                ${tagData.attributes.reduce(generateAttribute, '')}
+    function getFormTemplate(keyData: any): string {
+        return `
+            <div>
+                <style>
+                    #terales-edits-attrs-form .terales-tag {
+                        margin-top: 12px;
+                        display: flex;
+                        flex-direction: row;
+                        flex-wrap: nowrap;
+                        justify-content: space-between;
+                        align-content: stretch;
+                        align-items: flex-start;
+                    }
+                    #terales-edits-attrs-form .terales-tag:first-child {
+                        margin-top: 16px;
+                    }
+                
+                    #terales-edits-attrs-form .terales-label {
+                        font-size: 16px;
+                        line-height: 35px;
+                        width: 55px;
+                        overflow: hidden;
+                        order: 0;
+                        flex: 0 0 auto;
+                        align-self: auto;
+                    }
+                
+                    #terales-edits-attrs-form .terales-field-container {
+                        order: 0;
+                        flex: 1 1 auto;
+                        align-self: auto;
+                    }
+
+                    #terales-edits-attrs-form .terales-horizontal-spacing {
+                        flex: 0 0 16px;
+                    }
+                </style>
+                <div id="terales-edits-attrs-form">
+                    ${keyData.reduce(generateTag, '')}
+                </div>
             </div>
         `;
 
-        function generateAttribute(generated: string, attrData: any) {
+        function generateTag(generated: string, tagData:any) {
+            let tagName = '';
+            if (tagData.tag == 'A') tagName = 'Link:';
+            if (tagData.tag == 'IMG') tagName = 'Image:';
+    
             return generated + `
-                <div class="terales-horizontal-spacing"></div>
-                <div class="terales-field-container input-group input-group-sm">
-                    <span class="input-group-addon">${attrData.name}</span>
-                    <input data-placeholder="${attrData.placeholder}" value="${attrData.value}" type="text" class="form-control" />
+                <div class="terales-tag">
+                    <div class="terales-label">${tagName}</div>
+                    ${tagData.attributes.reduce(generateAttribute, '')}
                 </div>
             `;
+    
+            function generateAttribute(generated: string, attrData: any) {
+                return generated + `
+                    <div class="terales-horizontal-spacing"></div>
+                    <div class="terales-field-container input-group input-group-sm">
+                        <span class="input-group-addon">${attrData.name}</span>
+                        <input data-xpath="${tagData.xpath}" data-attribute-name="${attrData.name}" value="${attrData.value}" type="text" class="terales-attr-input-js form-control" />
+                    </div>
+                `;
+            }
         }
     }
+}
+
+function getXPathForElement(el: HTMLElement, xml: Document) {
+	var xpath = '';
+	var pos, tempitem2;
+
+	while(el !== xml.documentElement) {
+		pos = 0;
+		tempitem2 = el;
+		while(tempitem2) {
+			if (tempitem2.nodeType === 1 && tempitem2.nodeName === el.nodeName) { // If it is ELEMENT_NODE of the same name
+				pos += 1;
+			}
+			tempitem2 = tempitem2.previousSibling;
+		}
+
+		xpath = `${el.nodeName}[${pos}]//` + xpath;
+
+		el = <HTMLElement>el.parentNode;
+	}
+	xpath = '/html//' + xpath;
+	xpath = xpath.replace(/\/\/$/, '');
+	return xpath;
 }
