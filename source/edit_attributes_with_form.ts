@@ -50,7 +50,7 @@ function addFormToBottomPanel(panel: Element) {
                 'tag': el.tagName,
                 'attributes': []
             };
-            
+
             attributesToWatch.forEach(attrName => {
                 if (el.getAttribute(attrName)) {
                     currentTag.attributes.push({
