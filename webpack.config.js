@@ -4,8 +4,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-	devtool: 'inline-source-map',
+	devtool: 'source-map',
 	stats: 'errors-only',
+	node: false,
 	entry: {
 		preview_content_script: './source/preview_content_script',
 		edit_attributes_with_form: './source/edit_attributes_with_form',
@@ -34,7 +35,7 @@ module.exports = {
 			{
 				from: '**/*',
 				context: 'source',
-				ignore: ['*.js']
+				ignore: ['*.js', '*.ts']
 			}
 		])
 	],
@@ -43,11 +44,11 @@ module.exports = {
 		minimizer: [
 			new TerserPlugin({
 				terserOptions: {
-					mangle: false,
-					compress: false,
+					mangle: true,
+					compress: true,
 					output: {
-						beautify: true,
-						indent_level: 2 // eslint-disable-line camelcase
+						beautify: false,
+						indent_level: 2
 					}
 				}
 			})

@@ -5,7 +5,7 @@
 		"lint": "run-p lint:*",
 		"lint-fix": "run-p 'lint:* -- --fix'",
 		"lint:css": "stylelint source/**/*.css",
-		"lint:js": "xo",
+		"lint:js": "xo source/**",
 		"release:chrome": "cd distribution && webstore upload --auto-publish",
 		"release:firefox": "cd distribution && web-ext-submit",
 		"test": "run-s lint:* build",
