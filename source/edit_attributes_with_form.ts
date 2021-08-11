@@ -188,7 +188,7 @@ function generateForm(data: any): DocumentFragment {
                 attrInput.dataset.attributeName = attrData.name;
                 attrInput.value = attrData.value;
 
-                tagEl.insertAdjacentElement('beforeend', attrInput);
+                tagEl.appendChild(attrEl);
             });
 
             form.appendChild(tagFragment);
