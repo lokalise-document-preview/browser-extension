@@ -130,9 +130,6 @@ function makeObservable(target: iObservableObject) {
             const success = Reflect.set(target, property, value, receiver); // forward the operation to object
 
             if (success && property == 'currentFieldValue' && initialValue != newValue) { // if there were no error while setting the property
-                console.log('Called: ', value);
-                console.trace();
-
                 // call all handlers
                 target.handlers.forEach(handler => handler(property, value));
             }
@@ -142,9 +139,7 @@ function makeObservable(target: iObservableObject) {
 }
 
 function generateForm(data: any): DocumentFragment {
-    const form: DocumentFragment = document
-        .createRange()
-        .createContextualFragment(getFormTemplate(data));
+    const form = getForm(data);
 
     form.querySelectorAll('.terales-attr-input-js').forEach(input => {
         if (input instanceof HTMLInputElement) {
@@ -159,70 +154,88 @@ function generateForm(data: any): DocumentFragment {
 
     return form;
 
-    function getFormTemplate(keyData: any): string {
-        return `
-            <div>
-                <style>
-                    #terales-edits-attrs-form .terales-tag {
-                        margin-top: 12px;
-                        display: flex;
-                        flex-direction: row;
-                        flex-wrap: nowrap;
-                        justify-content: space-between;
-                        align-content: stretch;
-                        align-items: flex-start;
-                    }
-                    #terales-edits-attrs-form .terales-tag:first-child {
-                        margin-top: 16px;
-                    }
-                
-                    #terales-edits-attrs-form .terales-label {
-                        font-size: 16px;
-                        line-height: 35px;
-                        width: 55px;
-                        overflow: hidden;
-                        order: 0;
-                        flex: 0 0 auto;
-                        align-self: auto;
-                    }
-                
-                    #terales-edits-attrs-form .terales-field-container {
-                        order: 0;
-                        flex: 1 1 auto;
-                        align-self: auto;
-                    }
+    function getForm(keyData: any): DocumentFragment {
+        const container = document
+            .createRange()
+            .createContextualFragment(getFormContainerTemplate());
+        const form = container.querySelector('#terales-edits-attrs-form')!;
 
-                    #terales-edits-attrs-form .terales-horizontal-spacing {
-                        flex: 0 0 16px;
-                    }
-                </style>
-                <div id="terales-edits-attrs-form">
-                    ${keyData.reduce(generateTag, '')}
-                </div>
-            </div>
-        `;
-
-        function generateTag(generated: string, tagData:any) {
+        keyData.forEach((tagData: any) => {
             let tagName = '';
             if (tagData.tag == 'A') tagName = 'Link:';
             if (tagData.tag == 'IMG') tagName = 'Image:';
-    
-            return generated + `
+
+            const tagFragment = document.createRange().createContextualFragment(`
                 <div class="terales-tag">
-                    <div class="terales-label">${tagName}</div>
-                    ${tagData.attributes.reduce(generateAttribute, '')}
+                    <div class="terales-label"></div>
                 </div>
-            `;
-    
-            function generateAttribute(generated: string, attrData: any) {
-                return generated + `
+            `);
+            tagFragment.querySelector('.terales-label')!.insertAdjacentText('beforeend', tagName);
+            const tagEl = tagFragment.querySelector('.terales-tag')!;
+
+            tagData.attributes.forEach((attrData: any) => {
+                const attrEl = document.createRange().createContextualFragment(`
                     <div class="terales-horizontal-spacing"></div>
                     <div class="terales-field-container input-group input-group-sm">
-                        <span class="input-group-addon">${attrData.name}</span>
-                        <input data-xpath="${tagData.xpath}" data-attribute-name="${attrData.name}" value="${attrData.value}" type="text" class="terales-attr-input-js form-control" />
+                        <span class="input-group-addon"></span>
+                        <input data-xpath="" data-attribute-name="" value="" type="text" class="terales-attr-input-js form-control" />
                     </div>
-                `;
-            }
+                `);
+                attrEl.querySelector('.input-group-addon')!.insertAdjacentText('beforeend', attrData.name);
+
+                const attrInput = <HTMLInputElement>attrEl.querySelector('.terales-attr-input-js')!;
+                attrInput.dataset.xpath = tagData.xpath;
+                attrInput.dataset.attributeName = attrData.name;
+                attrInput.value = attrData.value;
+
+                tagEl.insertAdjacentElement('beforeend', attrInput);
+            });
+
+            form.appendChild(tagFragment);
+        });
+
+        return container;
+
+        function getFormContainerTemplate() {
+            return `
+                <div>
+                    <style>
+                        #terales-edits-attrs-form .terales-tag {
+                            margin-top: 12px;
+                            display: flex;
+                            flex-direction: row;
+                            flex-wrap: nowrap;
+                            justify-content: space-between;
+                            align-content: stretch;
+                            align-items: flex-start;
+                        }
+                        #terales-edits-attrs-form .terales-tag:first-child {
+                            margin-top: 16px;
+                        }
+                    
+                        #terales-edits-attrs-form .terales-label {
+                            font-size: 16px;
+                            line-height: 35px;
+                            width: 55px;
+                            overflow: hidden;
+                            order: 0;
+                            flex: 0 0 auto;
+                            align-self: auto;
+                        }
+                    
+                        #terales-edits-attrs-form .terales-field-container {
+                            order: 0;
+                            flex: 1 1 auto;
+                            align-self: auto;
+                        }
+
+                        #terales-edits-attrs-form .terales-horizontal-spacing {
+                            flex: 0 0 16px;
+                        }
+                    </style>
+                    <div id="terales-edits-attrs-form"></div>
+                </div>
+            `;
         }
     }
 }
