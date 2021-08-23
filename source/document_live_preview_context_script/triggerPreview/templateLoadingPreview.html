@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Live preview</title>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+        }
+        .loading > .overlay {
+            display: block;
+        }
+
+        .loader {
+            z-index: 1001;
+            animation: rotation 2s infinite linear;
+
+            position: fixed; /* or absolute */
+            top: 50%;
+            left: 50%;
+            margin-top: -12px;
+            margin-left: -15px;
+        }
+
+        @keyframes rotation {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(359deg); }
+        }
+    </style>
+</head>
+<body class="loading">
+    <iframe></iframe>
+    <div class="overlay">
+        <div class="loader">
+            <svg width="25" height="29" viewBox="0 0 25 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M25 17.6778H20.5805H17.6447H16.9195L12.5 22.0967L8.08049 17.6778H7.35533H4.41951H0V22.0967H6.2497L9.37485 25.2219L12.5 28.347L15.6252 25.2219L18.7497 22.0967H25V17.6778Z" fill="#FF6336"/>
+                <path d="M25 8.83911H0V13.2586H25V8.83911Z" fill="#FFC500"/>
+                <path d="M25 0H0V4.41951H25V0Z" fill="#A4A14A"/>
+            </svg>
+        </div>
+    </div>
+</body>
+</html>
