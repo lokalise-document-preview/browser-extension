@@ -48,7 +48,7 @@ module.exports = {
 			{
 				from: '**/*',
 				context: 'source',
-				ignore: ['*.js', '*.ts']
+				ignore: ['*.js', '*.ts', '*.html']
 			}
 		])
 	],

@@ -128,6 +128,7 @@ function callbackCollectApiToken(onLoaded: Function) {
             if (token.length > 39) {
                 previewWindow?.loadLocalContentTemplate('templateLoadingPreview');
                 await setApiToken(token);
+                projectParams = await getProjectParams();
                 await fetchPreviewIntoCurrentlyOpenedWindow();
                 document.getElementById(openPreviewBtnId)?.remove();
                 addOpenPreviewBtn(previewBtnSiblingSelector, callbackToFetchPreview);
