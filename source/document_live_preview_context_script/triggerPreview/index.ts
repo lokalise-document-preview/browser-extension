@@ -1,5 +1,6 @@
 import templateLoadingPreview from './templateLoadingPreview.html';
 import templateCollectApiToken from './templateCollectApiToken.html';
+import templateError from './templateError.html';
 
 export interface PreviewWindow {
     open(): void;
@@ -45,6 +46,9 @@ export class HtmlPreviewWindow implements PreviewWindow {
                     break;
                 case 'templateCollectApiToken':
                     template = templateCollectApiToken;
+                    break;
+                case 'templateError':
+                    template = templateError;
                     break;
             }
             this.win.document.documentElement.innerHTML = template;
@@ -205,5 +209,47 @@ export class CollectApiDocument {
     listenToTokenInput(onChange: (newValue: string) => any) {
         const input = <HTMLInputElement>this.doc.querySelector(this.tokenApiInputSelector);
         input?.addEventListener('input', () => onChange(input.value));
+    }
+}
+
+export class ErrorDocument {
+    private doc: Document;
+    private errorBoxSelector = '.error';
+
+    constructor(doc: Document) {
+        this.doc = doc;
+    }
+
+    insertError(error: Error | string) {
+        const el = <HTMLElement>this.doc.querySelector(this.errorBoxSelector);
+        const msg = error instanceof Error && Number.isInteger(parseInt(error.message)) 
+            ? this.getErrorText(parseInt(error.message))
+            : <string>error;
+
+        if (el) {
+            el.textContent = msg;
+        }
+    }
+
+    private getErrorText(errorCode: number) {
+        let msg: string;
+        switch (errorCode) {
+            case 400:
+                msg = 'Some required parameter is incorrect or missing required parameter (error in extension code).';
+                break;
+            case 401: // Lokalise reports 401 for a valid token but insufficient permissions
+            case 403:
+                msg = 'The "Download" permission is required for live preview or token is invalid.';
+                break;
+            case 404:
+                msg = 'The requested resource does not exist (error in extension code).';
+                break;
+            case 429:
+                msg = 'Too many requests hit the Lokalise API too quickly (error in extension code).';
+                break;
+            default:
+                msg = `Error code ${errorCode} was received (error in extension code).`;
+        }
+        return msg;
     }
 }

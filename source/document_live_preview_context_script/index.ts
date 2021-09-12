@@ -1,7 +1,7 @@
 import { PreviewParams } from './_types';
-import { fetchDocumentPreview, isApiTokenAvailable, setApiToken, CantReachExtensionApiError } from './apiService';
+import { fetchDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService';
 import getProjectParams from './getProjectParams';
-import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument } from './triggerPreview';
+import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './triggerPreview';
 import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './injectPreviewBtnAndListeners';
 
 let previewWindow: PreviewWindow | null = null;
@@ -10,40 +10,17 @@ const previewBtnSiblingSelector = '.filter-row-element-part.header-key-count-wra
 
 // TODO Upgrade to webpack v5 and ts-loader to user `await` in the top context
 let processedUrl = window.location.href;
-let projectParams: PreviewParams;
+let projectParams: PreviewParams | undefined;
 (async function() {
-    processedUrl = window.location.href;
-    
-    try {
-        projectParams = await getProjectParams();
-    } catch(error) {
-        if (error instanceof CantReachExtensionApiError) {
-            console.error('Can\'t reach the extension API to fetch language ISO code and a codument preview.', error);
-            return;
-        }
-
-        console.error(error);
-        return;
-    }
-    
-
-    if (projectParams.fileformat != 'html') {
-        return;
-        // TODO Show that only HTML preview is supported at the moment instead of closing
-    }
-
     if (await isApiTokenAvailable() == false) {
         addOpenPreviewBtn(previewBtnSiblingSelector, callbackCollectApiToken);
         return;
-    } 
+    }
+
+    await populateProjectParams();
     
-    if (Object.values(projectParams).every(Boolean)) {
-        addOpenPreviewBtn(previewBtnSiblingSelector, callbackToFetchPreview);
-        listenKeyTranslationOpenOrSave(
-            callbackToUpdateHighlightFetchedPreview,
-            callbackToUpdateKeyInFetchedPreview,
-            callbackToUpdateClosedKeyInFetchedPreview
-        );
+    if (projectParams && Object.values(projectParams).every(Boolean)) {
+        insertActivePreviewBtnAndListeners();
         return;
     }
 })();
@@ -56,23 +33,17 @@ if (keysContainer) {
             return;
         }
 
+        if (previewWindow?.isOpened() == false) {
+            return;
+        }
+
         if (await isApiTokenAvailable() == false) {
             closePreview();
         }
 
         previewWindow?.loadLocalContentTemplate('templateLoadingPreview');
-
-        getProjectParams().then(async params => {
-            projectParams = params;
-            processedUrl = window.location.href;
-
-            if (projectParams.fileformat != 'html') {
-                closePreview();
-                // TODO Show that only HTML preview is supported at the moment instead of closing
-            }
-
-            await fetchPreviewIntoCurrentlyOpenedWindow();
-        });
+        await populateProjectParams();
+        await fetchPreviewIntoCurrentlyOpenedWindow();
     });
     observer.observe(keysContainer, { childList: true });
 }
@@ -84,7 +55,7 @@ async function callbackToFetchPreview(onLoaded: Function) {
     // Prevent opening multiple previews
     closePreview();
 
-    if (projectParams.fileformat != 'html') {
+    if (projectParams?.fileformat != 'html') {
         return;
     }
 
@@ -107,51 +78,94 @@ function callbackToUpdateHighlightFetchedPreview(xpath?: string) {
 
 function callbackToUpdateKeyInFetchedPreview(xpath?: string, newContent?: string) {
     if (xpath) {
-        currentPreview?.keyUpdateContent(xpath, <string>newContent);
+        currentPreview?.keyUpdateContent(xpath, newContent ?? '');
     }
 }
 
 function callbackToUpdateClosedKeyInFetchedPreview(xpath?: string, currentContent?: string) {
     if (xpath) {
-        currentPreview?.keyUpdateContent(xpath, <string>currentContent);
+        currentPreview?.keyUpdateContent(xpath, currentContent ?? '');
         currentPreview?.keyDismissHighlight(xpath);
     }
 }
 
 function callbackCollectApiToken(onLoaded: Function) {
+    if (previewWindow) {
+        previewWindow.close();
+        previewWindow = null;
+    }
+    
     previewWindow = new HtmlPreviewWindow();
     previewWindow.open();
     const doc = previewWindow.loadLocalContentTemplate('templateCollectApiToken');
     if (doc) {
         const collectApiDocument = new CollectApiDocument(doc);
         collectApiDocument.listenToTokenInput(async token => {
-            if (token.length > 39) {
-                previewWindow?.loadLocalContentTemplate('templateLoadingPreview');
-                await setApiToken(token);
-                projectParams = await getProjectParams();
+            if (token.length < 40) {
+                return
+            }
+
+            previewWindow?.loadLocalContentTemplate('templateLoadingPreview');
+            await setApiToken(token);
+            await populateProjectParams();
+            if (projectParams && Object.values(projectParams).every(Boolean)) {
                 await fetchPreviewIntoCurrentlyOpenedWindow();
                 document.getElementById(openPreviewBtnId)?.remove();
-                addOpenPreviewBtn(previewBtnSiblingSelector, callbackToFetchPreview);
-                listenKeyTranslationOpenOrSave(
-                    callbackToUpdateHighlightFetchedPreview,
-                    callbackToUpdateKeyInFetchedPreview,
-                    callbackToUpdateClosedKeyInFetchedPreview
-                );
+                insertActivePreviewBtnAndListeners();
             }
         });
     }
     onLoaded();
 }
 
-async function fetchPreviewIntoCurrentlyOpenedWindow() {
-    if (previewWindow?.isOpened()) {
-        const previewContent = await fetchDocumentPreview(projectParams);
-        currentPreview = await previewWindow.loadNewExternalContent(previewContent);
+async function populateProjectParams() {
+    try {
+        projectParams = await getProjectParams();
+        processedUrl = window.location.href;
+
+        if (projectParams.fileformat != 'html') {
+            showError('Preview is available only for HTML documents.');
+        }
+    } catch(error) {
+        showError(error);
     }
+}
+
+async function fetchPreviewIntoCurrentlyOpenedWindow() {
+    if (previewWindow?.isOpened() && projectParams) {
+        try {
+            const previewContent = await fetchDocumentPreview(projectParams);
+            currentPreview = await previewWindow.loadNewExternalContent(previewContent);
+        } catch (error) {
+            await showError(error);
+        }
+    }
+}
+
+function insertActivePreviewBtnAndListeners() {
+    addOpenPreviewBtn(previewBtnSiblingSelector, callbackToFetchPreview);
+    listenKeyTranslationOpenOrSave(
+        callbackToUpdateHighlightFetchedPreview,
+        callbackToUpdateKeyInFetchedPreview,
+        callbackToUpdateClosedKeyInFetchedPreview
+    );
 }
 
 function closePreview() {
     previewWindow?.close();
     previewWindow = null;
     currentPreview = null;
+}
+
+async function showError(msg: Error | string) {
+    if (previewWindow?.isOpened() == false) {
+        return
+    }
+
+    currentPreview = null;
+    const errorDocElement = previewWindow?.loadLocalContentTemplate('templateError');
+    if (errorDocElement) {
+        const errorDoc = new ErrorDocument (errorDocElement);
+        errorDoc.insertError(msg);
+    }
 }

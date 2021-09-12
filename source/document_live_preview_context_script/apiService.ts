@@ -25,9 +25,15 @@ export async function setApiToken(token: string) {
     });
 }
 
-export class CantReachExtensionApiError extends Error {
+class CantReachExtensionApiError extends Error {
     constructor(msg: string) {
         super(msg);
+    }
+}
+
+class ReceivedApiError extends Error {
+    constructor(msg: number) {
+        super(String(msg));
     }
 }
 
@@ -43,9 +49,22 @@ async function fetchFromApi(path: string, additionalParams: any) {
         signal: controller.signal
     }).then(response => {
         clearTimeout(timeoutId);
-        return response;
+
+        if (response.ok) {
+            return response;
+        }
+
+        if (response.status == 401) {
+            setApiToken('');
+        }
+
+        throw new ReceivedApiError(response.status);
     }).catch(error => {
-        throw new CantReachExtensionApiError(error);
+        if (error instanceof ReceivedApiError) {
+            throw error;
+        } else {
+            throw new CantReachExtensionApiError('Can\'t reach the extension API due to some network error.');
+        }
     });
 }
 
