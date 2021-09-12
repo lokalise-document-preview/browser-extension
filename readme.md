@@ -1,7 +1,7 @@
 <p align="center" style="text-align: center">
 <h1>Lokalise document preview<br/> browser extension<br/> [EXPERIMENTAL & UNOFFICIAL]</h1>
 
-[Add to Chrome](https://chrome.google.com/webstore/detail/lokalise-document-preview/egnkinnacilaeckhljnbkaeahioacgba) • [Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/lokalise-document-preview/)
+[Add to Chrome](https://chrome.google.com/webstore/detail/lokalise-document-preview/egnkinnacilaeckhljnbkaeahioacgba)
 
 <a href="https://youtu.be/F-BfvoxQGQ4" target="_blank" rel="noopener noreferrer">
 <img src="https://github.com/terales/lokalise-html-document-preview/blob/master/media/preview.png?raw=true"
