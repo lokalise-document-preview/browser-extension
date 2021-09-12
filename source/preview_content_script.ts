@@ -50,10 +50,9 @@ function addPreview(activePreviewContainer: Element) {
 
     iframeSandboxed.style.border = "2px dashed #282c34";
     iframeSandboxed.style.padding = "0.5em";
-    iframeSandboxed.style.marginBottom = "5em"; // to have a distance from buttons
     iframeSandboxed.style.width = "100%";
     iframeSandboxed.style.height = "30em";
 
     iframeSandboxed.srcdoc = activePreviewContainer.textContent ? activePreviewContainer.textContent : "";
-    activePreviewContainer.appendChild(iframeSandboxed);
+    activePreviewContainer.prepend(iframeSandboxed);
 }
