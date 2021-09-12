@@ -1,5 +1,5 @@
 
-import { debounce as _debounce, get as _get } from "lodash";
+import debounce from "lodash/debounce";
 
 const spinnerSelector = "#spinner-main";
 const previewContainerSelector = ".tab-pane .tab-pane";
@@ -27,7 +27,7 @@ if (spinner instanceof HTMLElement) {
 }
 
 function reactToAttributeChange(element: Element, attribute: string, onAttributeChange: Function, debounceWait = 75) {
-    const onAttributeChangeDebounced = _debounce(<any>onAttributeChange, debounceWait, { trailing: true });
+    const onAttributeChangeDebounced = debounce(<any>onAttributeChange, debounceWait, { trailing: true });
 
     const observer = new MutationObserver((mutations: MutationRecord[]): void => {
         mutations.forEach((): void => {
@@ -40,7 +40,7 @@ function reactToAttributeChange(element: Element, attribute: string, onAttribute
 
 function getFilename(tabContentId: string) : string {
     const fileTab = document.querySelector(fileTabSelector.replace("%TAB_CONTENT_ID%", tabContentId));
-    return _get(fileTab, 'textContent', '')!;
+    return fileTab?.textContent ?? '';
 }
 
 function addPreview(activePreviewContainer: Element) {
@@ -50,10 +50,9 @@ function addPreview(activePreviewContainer: Element) {
 
     iframeSandboxed.style.border = "2px dashed #282c34";
     iframeSandboxed.style.padding = "0.5em";
-    iframeSandboxed.style.marginBottom = "5em"; // to have a distance from buttons
     iframeSandboxed.style.width = "100%";
     iframeSandboxed.style.height = "30em";
 
     iframeSandboxed.srcdoc = activePreviewContainer.textContent ? activePreviewContainer.textContent : "";
-    activePreviewContainer.appendChild(iframeSandboxed);
+    activePreviewContainer.prepend(iframeSandboxed);
 }

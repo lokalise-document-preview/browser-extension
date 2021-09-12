@@ -1,19 +1,12 @@
 {
 	"name": "Lokalise document preview (unofficial)",
-	"version": "2.0.0",
+	"version": "3.0.0",
 	"description": "Brings visual preview to HTML documents at Lokalise",
 	"homepage_url": "https://github.com/terales/lokalise-html-document-preview",
 	"manifest_version": 2,
-	"minimum_chrome_version": "74",
-	"applications": {
-		"gecko": {
-			"id": "lokalise-html-document-preview@terales.github.io",
-			"strict_min_version": "67.0"
-		}
-	},
-	"icons": {
-		"128": "icon.png"
-	},
+	"permissions": [
+		"storage"
+	],
 	"content_scripts": [
 		{
 			"matches": [
@@ -29,9 +22,23 @@
 			],
 			"js": [
 				"browser-polyfill.min.js",
-				"editor_context_script.js"
+				"document_editor_context_script.js",
+				"document_live_preview_context_script.js"
 			]
 		}
 	],
-	"web_accessible_resources": ["edit_attributes_with_form.js"]
+	"web_accessible_resources": [
+		"edit_attributes_with_form.js",
+		"codemirror_sync_current_value_with_data_attribute.js"
+	],
+	"minimum_chrome_version": "74",
+	"applications": {
+		"gecko": {
+			"id": "lokalise-html-document-preview@terales.github.io",
+			"strict_min_version": "67.0"
+		}
+	},
+	"icons": {
+		"128": "icon.png"
+	}
 }
