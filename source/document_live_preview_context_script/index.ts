@@ -132,7 +132,7 @@ async function populateProjectParams() {
 }
 
 async function fetchPreviewIntoCurrentlyOpenedWindow() {
-    if (previewWindow?.isOpened() && projectParams) {
+    if (previewWindow?.isOpened() && projectParams?.fileformat == 'html') {
         try {
             const previewContent = await fetchDocumentPreview(projectParams);
             currentPreview = await previewWindow.loadNewExternalContent(previewContent);
