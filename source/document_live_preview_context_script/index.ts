@@ -71,19 +71,19 @@ async function callbackToFetchPreview(onLoaded: Function) {
 }
 
 function callbackToUpdateHighlightFetchedPreview(xpath?: string) {
-    if (xpath) {
+    if (xpath?.startsWith('/html/body/')) {
         currentPreview?.keyHighlight(xpath);
     }
 }
 
 function callbackToUpdateKeyInFetchedPreview(xpath?: string, newContent?: string) {
-    if (xpath) {
+    if (xpath?.startsWith('/html/body/')) {
         currentPreview?.keyUpdateContent(xpath, newContent ?? '');
     }
 }
 
 function callbackToUpdateClosedKeyInFetchedPreview(xpath?: string, currentContent?: string) {
-    if (xpath) {
+    if (xpath?.startsWith('/html/body/')) {
         currentPreview?.keyUpdateContent(xpath, currentContent ?? '');
         currentPreview?.keyDismissHighlight(xpath);
     }
