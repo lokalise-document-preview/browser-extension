@@ -36,5 +36,19 @@ Source code is open and available for audit:
 ## Privacy policy
 
 This browser extension does not collect, send or store any information at all.<br/>
+<br/>
+For the document live preview feature this browser extension:
+* collects an API token from user and stores it locally in a browser,
+* collects project params (project ID, filename and target language ID) from the project URL,
+* sends a request via proxy hosted on Cloudflare Webworker to get a language ISO code from the ID,
+* sends a request via proxy hosted on Cloudflare Webworker to fetch a document preview.
 
+All data is sent to proxy via HTTPS and stored inside the requrest body only.<br>
+All data is received from proxy via HTTPS.
+
+No data is stored or cached on the proxy web worker level, [see the source code](https://github.com/terales/lokalise-html-document-preview-worker).
+
+[Cloudflare's policies about privacy and data protection](https://www.cloudflare.com/en-gb/trust-hub/privacy-and-data-protection/) are published separately.
+
+<br/>
 It's not affiliated with Lokalise.com and is just a personal project.
