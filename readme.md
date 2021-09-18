@@ -39,7 +39,7 @@ This browser extension does not collect, send or store any information at all.<b
 <br/>
 For the document live preview feature this browser extension:
 * collects an API token from user and stores it locally in a browser,
-* collects project params (project ID, filename and target language ID) from the project URL,
+* collects project params (project ID, filename and target language ID) from the project URL and removes after the tab is closed,
 * sends a request via proxy hosted on Cloudflare Webworker to get a language ISO code from the ID,
 * sends a request via proxy hosted on Cloudflare Webworker to fetch a document preview.
 
