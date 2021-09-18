@@ -1,5 +1,5 @@
 <p align="center" style="text-align: center">
-<h1>Lokalise document preview<br/> browser extension<br/> [EXPERIMENTAL & UNOFFICIAL]</h1>
+<h1>Lokalise document preview<br/> browser extension<br/> [UNOFFICIAL]</h1>
 
 [Add to Chrome](https://chrome.google.com/webstore/detail/lokalise-document-preview/egnkinnacilaeckhljnbkaeahioacgba)
 
