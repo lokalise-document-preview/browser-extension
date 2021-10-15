@@ -6,7 +6,7 @@ import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } f
 
 let previewWindow: PreviewWindow | null = null;
 let currentPreview: CurrentPreview | null = null;
-const previewBtnSiblingSelector = '.filter-row-element-part.header-key-count-wrap';
+const previewBtnSiblingSelector = '.languages-container > .bilingual-select';
 
 // TODO Upgrade to webpack v5 and ts-loader to user `await` in the top context
 let processedUrl = window.location.href;
