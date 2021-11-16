@@ -1,7 +1,7 @@
 {
-	"name": "Lokalise document preview (unofficial)",
-	"version": "3.1.0",
-	"description": "Brings visual preview to HTML documents at Lokalise",
+	"name": "Document preview for Lokalise",
+	"version": "3.1.1",
+	"description": "See the document during translation and before download",
 	"homepage_url": "https://github.com/terales/lokalise-html-document-preview",
 	"manifest_version": 2,
 	"permissions": [
