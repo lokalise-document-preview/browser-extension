@@ -4,8 +4,8 @@ const apiUrl = 'https://my-app.lokalise-document-experience-extension.workers.de
 const apiTimeoutMs = 5000;
 const apiTokenStorageKey = 'apiToken';
 
-export async function fetchDocumentPreview(params: PreviewParams) {
-    const response = await fetchFromApi('fetch-preview', params);
+export async function fetchHtmlDocumentPreview(params: PreviewParams) {
+    const response = await fetchFromApi('fetch-preview-html', params);
     return response.text();
 }
 

@@ -1,5 +1,5 @@
 import { PreviewParams } from './_types';
-import { fetchDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService';
+import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService';
 import getProjectParams from './getProjectParams';
 import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './triggerPreview';
 import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './injectPreviewBtnAndListeners';
@@ -134,7 +134,7 @@ async function populateProjectParams() {
 async function fetchPreviewIntoCurrentlyOpenedWindow() {
     if (previewWindow?.isOpened() && projectParams?.fileformat == 'html') {
         try {
-            const previewContent = await fetchDocumentPreview(projectParams);
+            const previewContent = await fetchHtmlDocumentPreview(projectParams);
             currentPreview = await previewWindow.loadNewExternalContent(previewContent);
         } catch (error) {
             await showError(error);
