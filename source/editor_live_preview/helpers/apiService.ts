@@ -10,6 +10,11 @@ export async function fetchHtmlDocumentPreview (params: PreviewParams): Promise<
   return await response.text()
 }
 
+export async function fetchDocxDocumentPreview (params: PreviewParams): Promise<Blob> {
+  const response = await fetchFromApi('fetch-preview-docx', params)
+  return await response.blob()
+}
+
 export async function fetchLangIso (projectId: string, langId: number): Promise<string> {
   const response = await fetchFromApi('get-lang-iso', { projectId, langId })
   const data = await response.json()

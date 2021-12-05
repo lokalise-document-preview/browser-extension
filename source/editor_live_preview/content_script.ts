@@ -1,7 +1,7 @@
-import { PreviewParams } from './types'
-import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './helpers/apiService'
+import { PreviewParams, PreviewWindow, CurrentPreview } from './types'
+import { fetchHtmlDocumentPreview, fetchDocxDocumentPreview, isApiTokenAvailable, setApiToken } from './helpers/apiService'
 import getProjectParams from './helpers/getProjectParams'
-import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './previewWindow'
+import { CollectApiDocument, DocxPreviewWindow, ErrorDocument, HtmlPreviewWindow } from './previewWindow'
 import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './helpers/injectPreviewBtnAndListeners'
 
 let previewWindow: PreviewWindow | null = null
@@ -33,17 +33,12 @@ if (keysContainer != null) {
         return
       }
 
-      if (previewWindow?.isOpened() === false) {
+      if (previewWindow === null || !previewWindow?.isOpened()) {
         return
       }
 
-      if (!await isApiTokenAvailable()) {
-        closePreview()
-      }
-
-      previewWindow?.loadLocalContentTemplate('templateLoadingPreview')
       await populateProjectParams()
-      await fetchPreviewIntoCurrentlyOpenedWindow()
+      void callbackToFetchPreview(() => {}, false)
     })()
   })
   observer.observe(keysContainer, { childList: true })
@@ -52,19 +47,38 @@ if (keysContainer != null) {
 // Close everything when the parent pages closes
 window.addEventListener('beforeunload', closePreview)
 
-async function callbackToFetchPreview (onLoaded: Function): Promise<void> {
+async function callbackToFetchPreview (onLoaded: Function, shouldFocus = true): Promise<void> {
   // Prevent opening multiple previews
   closePreview()
 
-  if (projectParams?.fileformat !== 'html') {
+  const fileformat = projectParams?.fileformat ?? ''
+
+  if (!['html', 'docx'].includes(fileformat)) {
     return
   }
 
-  previewWindow = new HtmlPreviewWindow()
-  previewWindow.open()
-  previewWindow.loadLocalContentTemplate('templateLoadingPreview')
-  await fetchPreviewIntoCurrentlyOpenedWindow()
-  previewWindow.focus()
+  switch (fileformat) {
+    case 'html':
+      previewWindow = new HtmlPreviewWindow()
+      break
+    case 'docx':
+      previewWindow = new DocxPreviewWindow()
+      break
+  }
+
+  if (previewWindow != null) {
+    previewWindow.open()
+    if (!shouldFocus) {
+      window.focus()
+    }
+
+    previewWindow.loadLocalContentTemplate('templateLoadingPreview')
+    await fetchPreviewIntoCurrentlyOpenedWindow()
+
+    if (shouldFocus) {
+      previewWindow.focus()
+    }
+  }
 
   onLoaded()
 }
@@ -134,16 +148,30 @@ async function populateProjectParams (): Promise<void> {
 }
 
 async function fetchPreviewIntoCurrentlyOpenedWindow (): Promise<void> {
+  if (projectParams === undefined) {
+    return
+  }
+
   if (previewWindow === null || !previewWindow.isOpened()) {
     return
   }
 
-  if (projectParams?.fileformat !== 'html') {
+  const fileformat = projectParams?.fileformat ?? ''
+
+  if (!['html', 'docx'].includes(fileformat)) {
     return
   }
 
   try {
-    const previewContent = await fetchHtmlDocumentPreview(projectParams)
+    let previewContent
+    switch (fileformat) {
+      case 'html':
+        previewContent = await fetchHtmlDocumentPreview(projectParams)
+        break
+      case 'docx':
+        previewContent = await fetchDocxDocumentPreview(projectParams)
+        break
+    }
     currentPreview = await previewWindow.loadNewExternalContent(previewContent)
   } catch (error) {
     showError(error as Error | string)
