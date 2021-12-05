@@ -1,4 +1,4 @@
-import { PreviewParams } from './_types'
+import { PreviewParams } from './types'
 import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService'
 import getProjectParams from './getProjectParams'
 import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './triggerPreview'
