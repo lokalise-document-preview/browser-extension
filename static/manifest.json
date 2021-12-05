@@ -1,6 +1,6 @@
 {
 	"name": "Document preview for Lokalise",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "See the document during translation and before download",
 	"homepage_url": "https://github.com/terales/lokalise-html-document-preview",
 	"manifest_version": 3,
