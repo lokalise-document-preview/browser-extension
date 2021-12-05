@@ -127,7 +127,7 @@ async function populateProjectParams() {
             showError('Preview is available only for HTML documents.');
         }
     } catch(error) {
-        showError(error);
+        showError(error as Error | string);
     }
 }
 
@@ -137,7 +137,7 @@ async function fetchPreviewIntoCurrentlyOpenedWindow() {
             const previewContent = await fetchHtmlDocumentPreview(projectParams);
             currentPreview = await previewWindow.loadNewExternalContent(previewContent);
         } catch (error) {
-            await showError(error);
+            await showError(error as Error | string);
         }
     }
 }

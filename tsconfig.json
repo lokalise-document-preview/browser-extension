@@ -1,12 +1,16 @@
 {
-	"extends": "@sindresorhus/tsconfig",
-	"moduleResolution": "node",
-	"compilerOptions": {
-		"target": "es2018",
-		"declaration": false,
-		"esModuleInterop": true
-	},
-	"include": [
-		"source"
-	]
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "source/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

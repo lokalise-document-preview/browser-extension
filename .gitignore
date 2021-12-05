@@ -1,5 +1,8 @@
 node_modules
 yarn.lock
 distribution
+dist
 
 .DS_Store
+.vscode
+.idea

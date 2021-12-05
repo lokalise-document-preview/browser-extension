@@ -1,9 +1,0 @@
-{
-	"name": "lokalise-html-document-preview",
-	"eslintConfig": {
-		"extends": [
-			"xo",
-			"xo-typescript/space"
-		]
-	}
-}

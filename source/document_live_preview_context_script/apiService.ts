@@ -1,3 +1,4 @@
+import browser from 'webextension-polyfill';
 import { PreviewParams } from './_types';
 
 const apiUrl = 'https://my-app.lokalise-document-experience-extension.workers.dev/'
