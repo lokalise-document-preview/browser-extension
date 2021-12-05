@@ -1,8 +1,8 @@
 import { PreviewParams } from './types'
-import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService'
-import getProjectParams from './getProjectParams'
-import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './triggerPreview'
-import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './injectPreviewBtnAndListeners'
+import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './helpers/apiService'
+import getProjectParams from './helpers/getProjectParams'
+import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './previewWindow'
+import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './helpers/injectPreviewBtnAndListeners'
 
 let previewWindow: PreviewWindow | null = null
 let currentPreview: CurrentPreview | null = null

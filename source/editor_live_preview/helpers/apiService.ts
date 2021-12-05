@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill'
-import { PreviewParams } from './types'
+import { PreviewParams } from '../types'
 
 const apiUrl = 'https://my-app.lokalise-document-experience-extension.workers.dev/'
 const apiTimeoutMs = 5000

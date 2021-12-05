@@ -1,4 +1,4 @@
-import { PreviewParams } from './types'
+import { PreviewParams } from '../types'
 import { fetchLangIso } from './apiService'
 
 interface StringMap { [key: number]: string }
