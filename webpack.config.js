@@ -1,6 +1,8 @@
 const CopyPlugin = require('copy-webpack-plugin')
 
-module.exports = {
+module.exports = (env, options) => ({
+  devtool: options.mode == 'development' ? 'inline-source-map' : false,
+  stats: 'minimal',
   resolve: {
     extensions: ['.ts', '.js']
   },
@@ -29,4 +31,7 @@ module.exports = {
       ],
     }),
   ],
-};
+  watchOptions: {
+    ignored: '**/node_modules',
+  },
+});
