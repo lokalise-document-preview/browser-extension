@@ -38,7 +38,7 @@ if (keysContainer != null) {
       }
 
       await populateProjectParams()
-      void callbackToFetchPreview(() => {}, false)
+      void callbackToFetchPreview(() => {})
     })()
   })
   observer.observe(keysContainer, { childList: true })
@@ -47,7 +47,7 @@ if (keysContainer != null) {
 // Close everything when the parent pages closes
 window.addEventListener('beforeunload', closePreview)
 
-async function callbackToFetchPreview (onLoaded: Function, shouldFocus = true): Promise<void> {
+async function callbackToFetchPreview (onLoaded: Function): Promise<void> {
   // Prevent opening multiple previews
   closePreview()
 
@@ -68,16 +68,9 @@ async function callbackToFetchPreview (onLoaded: Function, shouldFocus = true): 
 
   if (previewWindow != null) {
     previewWindow.open()
-    if (!shouldFocus) {
-      window.focus()
-    }
-
     previewWindow.loadLocalContentTemplate('templateLoadingPreview')
     await fetchPreviewIntoCurrentlyOpenedWindow()
-
-    if (shouldFocus) {
-      previewWindow.focus()
-    }
+    previewWindow.focus()
   }
 
   onLoaded()
@@ -107,8 +100,7 @@ function callbackToUpdateClosedKeyInFetchedPreview (xpath?: string, currentConte
 
 function callbackCollectApiToken (onLoaded: Function): void {
   if (previewWindow != null) {
-    previewWindow.close()
-    previewWindow = null
+    closePreview()
   }
 
   previewWindow = new HtmlPreviewWindow()
@@ -125,7 +117,7 @@ function callbackCollectApiToken (onLoaded: Function): void {
       await setApiToken(token)
       await populateProjectParams()
       if ((projectParams != null) && Object.values(projectParams).every(Boolean)) {
-        await fetchPreviewIntoCurrentlyOpenedWindow()
+        void callbackToFetchPreview(() => {})
         document.getElementById(openPreviewBtnId)?.remove()
         insertActivePreviewBtnAndListeners()
       }
@@ -138,9 +130,8 @@ async function populateProjectParams (): Promise<void> {
   try {
     projectParams = await getProjectParams()
     processedUrl = window.location.href
-
-    if (projectParams.fileformat !== 'html') {
-      showError('Preview is available only for HTML documents.')
+    if (!['html', 'docx'].includes(projectParams.fileformat)) {
+      showError('Preview is available only for HTML and DOCX documents.')
     }
   } catch (error) {
     showError(error as Error | string)
