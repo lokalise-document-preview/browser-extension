@@ -1,7 +1,7 @@
 const CopyPlugin = require('copy-webpack-plugin')
 
 module.exports = (env, options) => ({
-  devtool: options.mode == 'development' ? 'inline-source-map' : false,
+  devtool: options.mode === 'development' ? 'inline-source-map' : false,
   stats: 'minimal',
   resolve: {
     extensions: ['.ts', '.js']
@@ -14,24 +14,24 @@ module.exports = (env, options) => ({
     document_live_preview_context_script: './source/document_live_preview_context_script/index'
   },
   output: {
-    publicPath: "/dist/",
-    clean: true,
+    publicPath: '/dist/',
+    clean: true
   },
   module: {
     rules: [
-      { test: /\.ts$/, loader: "ts-loader" },
-      { test: /\.html$/, loader: "html-loader" },
-    ],
+      { test: /\.ts$/, loader: 'ts-loader' },
+      { test: /\.html$/, loader: 'html-loader' }
+    ]
   },
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: "static" },
-        { from: "node_modules/webextension-polyfill/dist/browser-polyfill.min.js" },
-      ],
-    }),
+        { from: 'static' },
+        { from: 'node_modules/webextension-polyfill/dist/browser-polyfill.min.js' }
+      ]
+    })
   ],
   watchOptions: {
-    ignored: '**/node_modules',
-  },
-});
+    ignored: '**/node_modules'
+  }
+})

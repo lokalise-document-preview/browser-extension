@@ -1,50 +1,50 @@
-import { PreviewParams } from './_types';
-import { fetchLangIso } from './apiService';
+import { PreviewParams } from './_types'
+import { fetchLangIso } from './apiService'
 
-interface StringMap { [key: number]: string; }
-let langIsoPageCache: StringMap = {};
+interface StringMap { [key: number]: string }
+const langIsoPageCache: StringMap = {}
 
-export default async function getProjectParams(): Promise<PreviewParams> {
-    const params: PreviewParams = {
-        projectId: '',
-        filename: '',
-        fileformat: '',
-        langIso: ''
-    };
+export default async function getProjectParams (): Promise<PreviewParams> {
+  const params: PreviewParams = {
+    projectId: '',
+    filename: '',
+    fileformat: '',
+    langIso: ''
+  }
 
-    const { langId, ...paramsFromUrl} = loadParamsFromUrl();
-    Object.assign(params, paramsFromUrl);
+  const { langId, ...paramsFromUrl } = loadParamsFromUrl()
+  Object.assign(params, paramsFromUrl)
 
-    Object.assign(params, loadParamsFromPage());
+  Object.assign(params, loadParamsFromPage())
 
-    if (!langIsoPageCache[langId]) {
-        langIsoPageCache[langId] = await fetchLangIso(params.projectId, langId);
-    }
-    Object.assign(params, { langIso: langIsoPageCache[langId] });
+  if (!(langId in langIsoPageCache)) {
+    langIsoPageCache[langId] = await fetchLangIso(params.projectId, langId)
+  }
+  Object.assign(params, { langIso: langIsoPageCache[langId] })
 
-    return params;
+  return params
 }
 
-function loadParamsFromUrl() {
-    const url = new URL(window.location.href);
-    
-    const projectIdRegex = new RegExp(/\/project\/(?<projectId>[0-9a-z]+\.[0-9]+)\//);
-    const projectId = url.pathname.match(projectIdRegex)?.groups?.projectId ?? '';
+function loadParamsFromUrl (): { projectId: string, langId: number } {
+  const url = new URL(window.location.href)
 
-    const langId = parseInt(url.searchParams.get('single_lang_id') ?? '');
+  const projectIdRegex = /\/project\/(?<projectId>[0-9a-z]+\.[0-9]+)\//
+  const projectId = url.pathname.match(projectIdRegex)?.groups?.projectId ?? ''
 
-    return {
-        projectId,
-        langId
-    };
+  const langId = parseInt(url.searchParams.get('single_lang_id') ?? '')
+
+  return {
+    projectId,
+    langId
+  }
 }
 
-function loadParamsFromPage() {
-    const filename = document.querySelector('.key-task-filename')?.textContent ?? '';
-    const fileformat = filename.substr(filename.lastIndexOf('.') + 1);
+function loadParamsFromPage (): { filename: string, fileformat: string } {
+  const filename = document.querySelector('.key-task-filename')?.textContent ?? ''
+  const fileformat = filename.substr(filename.lastIndexOf('.') + 1)
 
-    return {
-        filename,
-        fileformat
-    }
+  return {
+    filename,
+    fileformat
+  }
 }

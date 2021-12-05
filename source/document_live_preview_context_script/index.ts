@@ -1,171 +1,179 @@
-import { PreviewParams } from './_types';
-import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService';
-import getProjectParams from './getProjectParams';
-import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './triggerPreview';
-import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './injectPreviewBtnAndListeners';
+import { PreviewParams } from './_types'
+import { fetchHtmlDocumentPreview, isApiTokenAvailable, setApiToken } from './apiService'
+import getProjectParams from './getProjectParams'
+import { PreviewWindow, CurrentPreview, HtmlPreviewWindow, CollectApiDocument, ErrorDocument } from './triggerPreview'
+import { addOpenPreviewBtn, listenKeyTranslationOpenOrSave, openPreviewBtnId } from './injectPreviewBtnAndListeners'
 
-let previewWindow: PreviewWindow | null = null;
-let currentPreview: CurrentPreview | null = null;
-const previewBtnSiblingSelector = '.languages-container > .bilingual-select';
+let previewWindow: PreviewWindow | null = null
+let currentPreview: CurrentPreview | null = null
+const previewBtnSiblingSelector = '.languages-container > .bilingual-select'
 
-// TODO Upgrade to webpack v5 and ts-loader to user `await` in the top context
-let processedUrl = window.location.href;
-let projectParams: PreviewParams | undefined;
-(async function() {
-    if (await isApiTokenAvailable() == false) {
-        addOpenPreviewBtn(previewBtnSiblingSelector, callbackCollectApiToken);
-        return;
-    }
+let processedUrl = window.location.href
+let projectParams: PreviewParams | undefined
 
-    await populateProjectParams();
-    
-    if (projectParams && Object.values(projectParams).every(Boolean)) {
-        insertActivePreviewBtnAndListeners();
-        return;
-    }
-})();
+void (async function initializePreview (): Promise<void> {
+  if (!await isApiTokenAvailable()) {
+    addOpenPreviewBtn(previewBtnSiblingSelector, callbackCollectApiToken)
+    return
+  }
+
+  await populateProjectParams()
+
+  if ((projectParams != null) && Object.values(projectParams).every(Boolean)) {
+    insertActivePreviewBtnAndListeners()
+  }
+})()
 
 // Support switching between files withing a project
-const keysContainer = document.getElementById('endless');
-if (keysContainer) {
-    const observer = new MutationObserver(async () => {
-        if (window.location.href == processedUrl) {
-            return;
-        }
+const keysContainer = document.getElementById('endless')
+if (keysContainer != null) {
+  const observer = new MutationObserver(() => {
+    void (async () => {
+      if (window.location.href === processedUrl) {
+        return
+      }
 
-        if (previewWindow?.isOpened() == false) {
-            return;
-        }
+      if (previewWindow?.isOpened() === false) {
+        return
+      }
 
-        if (await isApiTokenAvailable() == false) {
-            closePreview();
-        }
+      if (!await isApiTokenAvailable()) {
+        closePreview()
+      }
 
-        previewWindow?.loadLocalContentTemplate('templateLoadingPreview');
-        await populateProjectParams();
-        await fetchPreviewIntoCurrentlyOpenedWindow();
-    });
-    observer.observe(keysContainer, { childList: true });
+      previewWindow?.loadLocalContentTemplate('templateLoadingPreview')
+      await populateProjectParams()
+      await fetchPreviewIntoCurrentlyOpenedWindow()
+    })()
+  })
+  observer.observe(keysContainer, { childList: true })
 }
 
 // Close everything when the parent pages closes
-window.addEventListener('beforeunload', closePreview);
+window.addEventListener('beforeunload', closePreview)
 
-async function callbackToFetchPreview(onLoaded: Function) {
-    // Prevent opening multiple previews
-    closePreview();
+async function callbackToFetchPreview (onLoaded: Function): Promise<void> {
+  // Prevent opening multiple previews
+  closePreview()
 
-    if (projectParams?.fileformat != 'html') {
-        return;
-    }
+  if (projectParams?.fileformat !== 'html') {
+    return
+  }
 
-    previewWindow = new HtmlPreviewWindow();
-    if (previewWindow) {
-        previewWindow.open();
-        previewWindow.loadLocalContentTemplate('templateLoadingPreview');
-        await fetchPreviewIntoCurrentlyOpenedWindow();
-        previewWindow.focus();
-    }
+  previewWindow = new HtmlPreviewWindow()
+  previewWindow.open()
+  previewWindow.loadLocalContentTemplate('templateLoadingPreview')
+  await fetchPreviewIntoCurrentlyOpenedWindow()
+  previewWindow.focus()
 
-    onLoaded();
+  onLoaded()
 }
 
-function callbackToUpdateHighlightFetchedPreview(xpath?: string) {
-    if (xpath?.startsWith('/html/body/')) {
-        currentPreview?.keyHighlight(xpath);
-    }
+function callbackToUpdateHighlightFetchedPreview (xpath?: string): void {
+  const isValidXpath = xpath?.startsWith('/html/body/') ?? false
+  if (isValidXpath) {
+    currentPreview?.keyHighlight(xpath as string)
+  }
 }
 
-function callbackToUpdateKeyInFetchedPreview(xpath?: string, newContent?: string) {
-    if (xpath?.startsWith('/html/body/')) {
-        currentPreview?.keyUpdateContent(xpath, newContent ?? '');
-    }
+function callbackToUpdateKeyInFetchedPreview (xpath?: string, newContent?: string): void {
+  const isValidXpath = xpath?.startsWith('/html/body/') ?? false
+  if (isValidXpath) {
+    currentPreview?.keyUpdateContent(xpath as string, newContent ?? '')
+  }
 }
 
-function callbackToUpdateClosedKeyInFetchedPreview(xpath?: string, currentContent?: string) {
-    if (xpath?.startsWith('/html/body/')) {
-        currentPreview?.keyUpdateContent(xpath, currentContent ?? '');
-        currentPreview?.keyDismissHighlight(xpath);
-    }
+function callbackToUpdateClosedKeyInFetchedPreview (xpath?: string, currentContent?: string): void {
+  const isValidXpath = xpath?.startsWith('/html/body/') ?? false
+  if (isValidXpath) {
+    currentPreview?.keyUpdateContent(xpath as string, currentContent ?? '')
+    currentPreview?.keyDismissHighlight(xpath as string)
+  }
 }
 
-function callbackCollectApiToken(onLoaded: Function) {
-    if (previewWindow) {
-        previewWindow.close();
-        previewWindow = null;
-    }
-    
-    previewWindow = new HtmlPreviewWindow();
-    previewWindow.open();
-    const doc = previewWindow.loadLocalContentTemplate('templateCollectApiToken');
-    if (doc) {
-        const collectApiDocument = new CollectApiDocument(doc);
-        collectApiDocument.listenToTokenInput(async token => {
-            if (token.length < 40) {
-                return
-            }
+function callbackCollectApiToken (onLoaded: Function): void {
+  if (previewWindow != null) {
+    previewWindow.close()
+    previewWindow = null
+  }
 
-            previewWindow?.loadLocalContentTemplate('templateLoadingPreview');
-            await setApiToken(token);
-            await populateProjectParams();
-            if (projectParams && Object.values(projectParams).every(Boolean)) {
-                await fetchPreviewIntoCurrentlyOpenedWindow();
-                document.getElementById(openPreviewBtnId)?.remove();
-                insertActivePreviewBtnAndListeners();
-            }
-        });
-    }
-    onLoaded();
-}
-
-async function populateProjectParams() {
-    try {
-        projectParams = await getProjectParams();
-        processedUrl = window.location.href;
-
-        if (projectParams.fileformat != 'html') {
-            showError('Preview is available only for HTML documents.');
-        }
-    } catch(error) {
-        showError(error as Error | string);
-    }
-}
-
-async function fetchPreviewIntoCurrentlyOpenedWindow() {
-    if (previewWindow?.isOpened() && projectParams?.fileformat == 'html') {
-        try {
-            const previewContent = await fetchHtmlDocumentPreview(projectParams);
-            currentPreview = await previewWindow.loadNewExternalContent(previewContent);
-        } catch (error) {
-            await showError(error as Error | string);
-        }
-    }
-}
-
-function insertActivePreviewBtnAndListeners() {
-    addOpenPreviewBtn(previewBtnSiblingSelector, callbackToFetchPreview);
-    listenKeyTranslationOpenOrSave(
-        callbackToUpdateHighlightFetchedPreview,
-        callbackToUpdateKeyInFetchedPreview,
-        callbackToUpdateClosedKeyInFetchedPreview
-    );
-}
-
-function closePreview() {
-    previewWindow?.close();
-    previewWindow = null;
-    currentPreview = null;
-}
-
-async function showError(msg: Error | string) {
-    if (previewWindow?.isOpened() == false) {
+  previewWindow = new HtmlPreviewWindow()
+  previewWindow.open()
+  const doc = previewWindow.loadLocalContentTemplate('templateCollectApiToken')
+  if (doc != null) {
+    const collectApiDocument = new CollectApiDocument(doc)
+    collectApiDocument.listenToTokenInput(async token => {
+      if (token.length < 40) {
         return
-    }
+      }
 
-    currentPreview = null;
-    const errorDocElement = previewWindow?.loadLocalContentTemplate('templateError');
-    if (errorDocElement) {
-        const errorDoc = new ErrorDocument (errorDocElement);
-        errorDoc.insertError(msg);
+      previewWindow?.loadLocalContentTemplate('templateLoadingPreview')
+      await setApiToken(token)
+      await populateProjectParams()
+      if ((projectParams != null) && Object.values(projectParams).every(Boolean)) {
+        await fetchPreviewIntoCurrentlyOpenedWindow()
+        document.getElementById(openPreviewBtnId)?.remove()
+        insertActivePreviewBtnAndListeners()
+      }
+    })
+  }
+  onLoaded()
+}
+
+async function populateProjectParams (): Promise<void> {
+  try {
+    projectParams = await getProjectParams()
+    processedUrl = window.location.href
+
+    if (projectParams.fileformat !== 'html') {
+      showError('Preview is available only for HTML documents.')
     }
+  } catch (error) {
+    showError(error as Error | string)
+  }
+}
+
+async function fetchPreviewIntoCurrentlyOpenedWindow (): Promise<void> {
+  if (previewWindow === null || !previewWindow.isOpened()) {
+    return
+  }
+
+  if (projectParams?.fileformat !== 'html') {
+    return
+  }
+
+  try {
+    const previewContent = await fetchHtmlDocumentPreview(projectParams)
+    currentPreview = await previewWindow.loadNewExternalContent(previewContent)
+  } catch (error) {
+    showError(error as Error | string)
+  }
+}
+
+function insertActivePreviewBtnAndListeners (): void {
+  addOpenPreviewBtn(previewBtnSiblingSelector, onLoaded => { void callbackToFetchPreview(onLoaded) })
+  listenKeyTranslationOpenOrSave(
+    callbackToUpdateHighlightFetchedPreview,
+    callbackToUpdateKeyInFetchedPreview,
+    callbackToUpdateClosedKeyInFetchedPreview
+  )
+}
+
+function closePreview (): void {
+  previewWindow?.close()
+  previewWindow = null
+  currentPreview = null
+}
+
+function showError (msg: Error | string): void {
+  if (previewWindow?.isOpened() === false) {
+    return
+  }
+
+  currentPreview = null
+  const errorDocElement = previewWindow?.loadLocalContentTemplate('templateError')
+  if (errorDocElement != null) {
+    const errorDoc = new ErrorDocument(errorDocElement)
+    errorDoc.insertError(msg)
+  }
 }
