@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill'
 
-appendJsFileAsInlineScript('codemirror_sync_current_value_with_data_attribute')
-appendJsFileAsInlineScript('edit_attributes_with_form')
+appendJsFileAsInlineScript('editor_sync_codemirror_with_dom_inline_script')
+appendJsFileAsInlineScript('editor_add_attributes_form_inline_script')
 
 function appendJsFileAsInlineScript (filename: string): void {
   const script = document.createElement('script')

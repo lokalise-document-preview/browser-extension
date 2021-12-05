@@ -7,11 +7,11 @@ module.exports = (env, options) => ({
     extensions: ['.ts', '.js']
   },
   entry: {
-    preview_content_script: './source/preview_content_script',
-    document_editor_context_script: './source/document_editor_context_script',
-    codemirror_sync_current_value_with_data_attribute: './source/codemirror_sync_current_value_with_data_attribute',
-    edit_attributes_with_form: './source/edit_attributes_with_form',
-    document_live_preview_context_script: './source/document_live_preview_context_script/index'
+    download_preview_content_script: './source/download_preview/content_script',
+    editor_inject_inline_scripts_content_script: './source/editor_inject_inline_scripts/content_script',
+    editor_sync_codemirror_with_dom_inline_script: './source/editor_sync_codemirror_with_dom/inline_script',
+    editor_add_attributes_form_inline_script: './source/editor_add_attributes_form/inline_script',
+    editor_live_preview_content_script: './source/editor_live_preview/content_script'
   },
   output: {
     publicPath: '/dist/',

@@ -13,7 +13,7 @@
 				"https://app.lokalise.com/download/download-preview"
 			],
 			"js": [
-				"preview_content_script.js"
+				"download_preview_content_script.js"
 			]
 		},
 		{
@@ -22,15 +22,15 @@
 			],
 			"js": [
 				"browser-polyfill.min.js",
-				"document_editor_context_script.js",
-				"document_live_preview_context_script.js"
+				"editor_inject_inline_scripts_content_script.js",
+				"editor_live_preview_content_script.js"
 			]
 		}
 	],
 	"web_accessible_resources": [{
 		"resources": [
-			"edit_attributes_with_form.js",
-			"codemirror_sync_current_value_with_data_attribute.js"
+			"editor_sync_codemirror_with_dom_inline_script.js",
+			"editor_add_attributes_form_inline_script.js"
 		],
 		"matches": ["https://app.lokalise.com/*"]
 	  }],
