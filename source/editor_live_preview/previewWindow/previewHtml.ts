@@ -97,6 +97,17 @@ export class HtmlLoadedDocument implements CurrentPreview {
   constructor (iframe: HTMLIFrameElement) {
     if (iframe.contentDocument != null) {
       this.doc = iframe.contentDocument
+
+      // Very specific fix for one particular company and their content type usage
+      // when carousel powered by JS won't be scrollable
+      const unscrollableDiv = this.doc.querySelector('body > div.overlay')
+      if (unscrollableDiv) {
+        const unscrollableDivStyles = this.doc.defaultView?.getComputedStyle(unscrollableDiv)
+        if (unscrollableDivStyles?.getPropertyValue('display') == 'flex' && unscrollableDivStyles?.getPropertyValue('position') == 'fixed') {
+          (unscrollableDiv as HTMLElement).style.position = 'static'
+        }
+      }
+
     } else {
       throw new Error('Can\'t access HTML preview contentDocument property.')
     }
